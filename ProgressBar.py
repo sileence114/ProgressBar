@@ -50,6 +50,11 @@ class BarStyle(Enum):
 
 class Bar(object):
     def __init__(self, text, id=None):
+        """
+        :param text: 必须为"原始JSON文本格式"(暂时不支持RText，Fallen_Breath.lazy)
+        :type text: str
+        :param id:
+        """
         self._color = BarColor.WHITE
         self._style = BarStyle.PROGRESS
         self._value = 0
@@ -81,6 +86,14 @@ class Bar(object):
             if self._id in Bars.keys():
                 del Bars[self._id]
 
+    def get_time(self):
+        """
+        获取Bar创建的时间
+        创建时，使用的time.time()获取的时间
+        :return: 创建时间
+        """
+        return self._time
+
     def delete(self):
         """
         从Bars中删除Bar，并将bossbar从minecraft中删除
@@ -105,14 +118,6 @@ class Bar(object):
         """
         return self._id
 
-    def get_time(self):
-        """
-        获取Bar创建的时间
-        创建时，使用的time.time()获取的时间
-        :return: 创建时间
-        """
-        return self._time
-
     def text(self, text=None):
         """
         str 设置/获取Bar的标题 必须为"原始JSON文本格式"(暂时不支持RText，Fallen_Breath.lazy) 请自行校验 如：
@@ -136,7 +141,7 @@ class Bar(object):
         :type color: None, BarColor
         :return: 若输入值则返回self 否则返回颜色
         """
-        if color is not None and type(color) is BarColor:
+        if type(color) is BarColor:
             self._color = color
             server_instance.execute(f'bossbar set pb:{self._id} color {color.name.lower()}')
             return self
@@ -150,12 +155,26 @@ class Bar(object):
         :type style: None, BarStyle
         :return: 若输入值则返回self 否则返回样式
         """
-        if style is not None and type(style) is BarStyle:
+        if type(style) is BarStyle:
             self._style = style
             server_instance.execute(f'bossbar set pb:{self._id} style {style.name.lower()}')
             return self
         else:
             return self._style
+
+    def max(self, max_=None):
+        """
+        int 设置/获取Bar的最大值
+        :param max_: 输入设置值 留空则返回最大值 0< max < 2147483647
+        :type max_: None, int
+        :return: 若输入值则返回self 否则返回最大值
+        """
+        if type(max_) is int and 2147483647 >= max_ > 0:
+            self._max = max_
+            server_instance.execute(f'bossbar set pb:{self._id} max {max_}')
+            return self
+        else:
+            return self._max
 
     def value(self, value=None):
         """
@@ -164,26 +183,12 @@ class Bar(object):
         :type value: None, int
         :return: 若输入值则返回self 否则返回值
         """
-        if value is not None and type(value) is int and self._max >= value >= 0:
+        if type(value) is int and self._max >= value >= 0:
             self._value = value
             server_instance.execute(f'bossbar set pb:{self._id} value {value}')
             return self
         else:
             return self._value
-
-    def max(self, max=None):
-        """
-        int 设置/获取Bar的最大值
-        :param value: 输入设置值 留空则返回最大值 0< max < 2147483647
-        :type value: None, int
-        :return: 若输入值则返回self 否则返回最大值
-        """
-        if max is not None and type(max) is int and 2147483647 > max > 0:
-            self._max = max
-            server_instance.execute(f'bossbar set pb:{self._id} max {max}')
-            return self
-        else:
-            return self._max
 
     def visible(self, visible=None):
         """
@@ -192,7 +197,7 @@ class Bar(object):
         :type visible: None, bool
         :return: 若输入值则返回self 否则返回可见性
         """
-        if visible is not None and type(visible) is bool:
+        if type(visible) is bool:
             self._visible = visible
             server_instance.execute(f'bossbar set pb:{self._id} visible {str(visible).lower()}')
             return self
