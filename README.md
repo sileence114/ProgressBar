@@ -1,7 +1,15 @@
 # ProgressBar
-通过封装/bossbar实现的进度条。
 
 > 灵感来源于Bukkit端插件CMI
+
+通过封装/bossbar实现的进度条。
+
+
+
+## 所需模块
+- `uuid`
+### 安装
+- `pip install uuid`
 
 ## 快速上手
 安装至MCDR后登陆服务器，输入：
@@ -14,9 +22,9 @@
 
 |名称|参数|描述|
 |----|----|----|
-|wait_bar|wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NOTCHED_10, update_interval=0.5, fall=True|召唤一个等待条并阻塞，结束后消失并返回None，可代替time.sleep()|
+|wait_bar|wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NOTCHED_10, update_interval=0.5, fall=True|召唤一个等待条并阻塞，计时结束后消失并返回None，可代替time.sleep()|
 
-### wait_bar
+### wait_bar(wait_bar|wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NOTCHED_10, update_interval=0.5, fall=True)
 
 |参数|类型|描述|默认值|
 |----|----|----|----|
@@ -43,6 +51,40 @@
 > `color`与`style`分别输入`BarColor`与`BarStyle`枚举类，请参考下文“类-BarColor/BarStyle”。
 > 
 > `fall`值为True则倒计时过程中条的值递减（0%->100%），False递增（100%->0%）。
+
+## Bar类
+通过Bar类可以通过创建对象的方式创建bossbar，很方便的修改、获取bossbar的参数。
+
+### 成员变量
+**请通过Getter/Setter方法访问成员变量！**
+Setter会更改配置到minecraft，直接更改变量会导致很多问题！
+|名称|默认值|用途|Getter()|Setter(val)|
+|----|----|----|----|----|
+|**\_id**|无|用于关联Bar对象与bossbar|get_id()|无|
+|**\_text**|无|用于设置bossbar标题|text()|text(val)|
+|**\_time**|time.time()|记录创建时间|get_time()|无|
+|**\_color**|BarColor.WHITE|设置bossbar颜色|color()|color(val)|
+|**\_style**|BarStyle.PROGRESS|设置bossbar样式|style()|style(val)|
+|**\_value**|0|bossbar的值|value()|value(val)|
+|**\_max**|100|bossbar的最大值|max()|max(val)|
+|**\_visible**|True|bossbar的可见性|visible()|visible(val)|
+|\_\_del\_count|0|析构执行计数 避免无尽套娃|无|无|
+|\_\_deleted|False|记录是否从minecraft中删除|无|无|
+
+### 构造函数 \_\_init\_\_(self, text, id=None)
+
+|参数|类型|描述|默认值|
+|----|----|----|----|
+|text|str|bossbar的标题|必须项|
+|id|str|Bar对象的ID|uuid.uuid4()|
+
+在构造时，会通过`bossbar`命令创建id为`pb:{id}`的bossbar，所以请不要手动通过命令修改命名空间为`pb`的bossbar！
+当Bar成功创建时，会自动将自己添加到全局的字典变量Bars，key为`id`。
+
+> `text`为[`原始JSON文本格式`](https://minecraft-zh.gamepedia.com/%E5%8E%9F%E5%A7%8BJSON%E6%96%87%E6%9C%AC%E6%A0%BC%E5%BC%8F)，需要自行验证格式，暂不支持直接输入RText（Fallen_Breath.lazy）。
+> `id`作为寻找Bar对象的键，不可重复，若与现有的重复，则会与没有指定一样分配一个随机的UUID。
+
+## 还在施工，先commit一下吧……
 
 ## 枚举类
 ### BarColor
@@ -89,5 +131,3 @@
 > |`/bossbar set bar:test color white`|白色|
 > |`/bossbar set bar:test color yellow`|黄色|
 > 5. 最后记得把刚刚创建的bossbar删掉：`/bossbar remove bar:test`。
-
-## 还在施工，先commit一下吧……
