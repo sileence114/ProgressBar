@@ -11,6 +11,7 @@
 即可获得一个10秒的倒计时条（确保权限等级>1）。
 
 ## 静态方法
+
 |名称|参数|描述|
 |----|----|----|
 |wait_bar|wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NOTCHED_10, update_interval=0.5, fall=True|召唤一个等待条并阻塞，结束后消失并返回None，可代替time.sleep()|
@@ -38,8 +39,54 @@
 > |`{wait_passed_time}`|已等待时间|
 > |`{wait_left_time}`|剩余时间|
 
-> `color`与`style`分别输入`BarColor`与`BarStyle`枚举类，请参考下文“类”。
+> `color`与`style`分别输入`BarColor`与`BarStyle`枚举类，请参考下文“类-BarColor/BarStyle”。
 
 > `fall`值为True则倒计时过程中条的值递减（0%->100%），False递增（100%->0%）。
 
-> ## 施工中，先Commit一下，刚刚刷新了一下，一个下午的努力全部木大了。
+## 枚举类
+### BarColor
+这是一个描述Bar颜色的枚举类，用于`bossbar set <id> color <color>`命令中的<color>
+
+|枚举项|意义|
+|----|----|
+|BLUE|蓝色|
+|GREEN|绿色|
+|PINK|粉色|
+|PURPLE|紫色|
+|RED|红色|
+|WHITE|白色|
+|YELLOW|黄色|
+
+使用例：progress_bar=Bar('"Test"').color(**BarColor.BLUE**)
+
+### BarStyle
+这是一个描述Bar样式的枚举类，用于`bossbar set <id> style <style>`命令中的<style>
+
+|枚举项|意义|
+|----|----|
+|NOTCHED_6|分6段|
+|NOTCHED_10|分10段|
+|NOTCHED_12|分12段|
+|NOTCHED_20|分20端|
+|PROGRESS|连续不分段|
+
+使用例：progress_bar=Bar('"Test"').color(**BarColor.BLUE**)
+
+> 若不知道各个颜色和样式的区别，可以开一个能使用指令的存档，然后试着：
+> 1. 创建bossbar：`/bossbar add bar:test "test"`；
+> 2. 设置对自己可见：`/bossbar set bar:test players @s`；
+> 3. 设置值为50：`/bossbar set bar:test value 50`；
+> 4. 现在应该能看到一个白色的boss栏了，尝试下表的命令：
+> 
+> |命令|更改为颜色|命令|样式|
+> |----|----|----|----|
+> |`/bossbar set bar:test color blue`|蓝色|`/bossbar set bar:test style notched_6`|分6段|
+> |`/bossbar set bar:test color green`|绿色|`/bossbar set bar:test style notched_10`|分10段|
+> |`/bossbar set bar:test color pink`|粉色|`/bossbar set bar:test style notched_12`|分12段|
+> |`/bossbar set bar:test color purple`|紫色|`/bossbar set bar:test style notched_20`|分20端|
+> |`/bossbar set bar:test color red`|红色|`/bossbar set bar:test style progress`|连续不分段|
+> |`/bossbar set bar:test color white`|白色|
+> |`/bossbar set bar:test color yellow`|黄色|
+> 5. 最后记得把刚刚创建的bossbar删掉：`/bossbar remove bar:test`。
+
+## 还在施工，先commit一下吧……
