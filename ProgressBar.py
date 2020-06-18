@@ -69,7 +69,7 @@ class Bar(object):
             server_instance.logger.info(
                 f'Bar创建失败！原因：{"[插件未加载]" if server_instance is None else ""}{"[服务端未就绪]" if not if_server_alive else ""}')
             server_instance.logger.debug('未准备就绪时的Bar创建失败：')
-            server_instance.logger.debug(f' - {{text: "{text}", id: "{id}"}}')
+            server_instance.logger.debug(f' - text: "{text}" id: "{id}"')
 
     def __del__(self):
         if self.__del_count < 2:
@@ -115,8 +115,9 @@ class Bar(object):
 
     def text(self, text=None):
         """
-        str 设置/获取Bar的标题 必须为有效的JSON文本 请自行校验 如：
+        str 设置/获取Bar的标题 必须为"原始JSON文本格式"(暂时不支持RText，Fallen_Breath.lazy) 请自行校验 如：
         '{"text": "BarBar"}'
+        具体请参照 https://minecraft-zh.gamepedia.com/%E5%8E%9F%E5%A7%8BJSON%E6%96%87%E6%9C%AC%E6%A0%BC%E5%BC%8F
         :param text: 输入设置值 留空则返回标题
         :type text: None, bool
         :return: 若输入值则返回self 否则返回标题
@@ -274,7 +275,7 @@ def wait_bar(wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NO
     :type wait_time: float, int
     :param player: 显示给指定玩家 输入玩家ID或@选择器
     :type player: str
-    :param text: 倒计时文字 必须为有效的JSON文本 请自行校验 可使用占位符：{waite_time}-等待总时间 {wait_left_time}-剩余时间 {wait_passed_time}-已等待时间 如:'{{"text": "Please wait {wait_left_time}s... {wait_passed_time}/{waite_time}"}}'
+    :param text: 倒计时文字 必须为有效的"原始JSON文本格式"(暂时不支持RText，Fallen_Breath.lazy) 请自行校验 可使用占位符：{waite_time}-等待总时间 {wait_left_time}-剩余时间 {wait_passed_time}-已等待时间 如:'"请等待{wait_left_time}秒... {wait_passed_time}/{waite_time}"'
     :type text: str
     :param color: 设置Bar的颜色 若标题的JSON里面没有设置颜色 那也一并设置了
     :type color: BarColor
@@ -294,7 +295,7 @@ def wait_bar(wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NO
             raise e
     wait_time = round(int((wait_time + 0.025) / 0.05) * 0.05, 2)
     if text in ("", None):
-        text = '{{"text": "请等待{wait_left_time}秒... {wait_passed_time}/{waite_time}"}}'
+        text = '"请等待{wait_left_time}秒... {wait_passed_time}/{waite_time}"'
     if color is not None and type(color) is BarColor:
         color = BarColor.WHITE
     if style is not None and type(style) is BarStyle:
@@ -314,11 +315,11 @@ def wait_bar(wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NO
             fall = True
     # 创建Bar
     waited = 0
-    progress_bar = Bar(text.format(
-        waite_time=('%.2f' % wait_time),
-        wait_passed_time=('%.2f' % waited),
-        wait_left_time=('%.2f' % (wait_time - waited))
-    ))
+    progress_bar = Bar(
+        text.replace('{waite_time}', '%.1f' % wait_time)
+            .replace('{wait_passed_time}', '%.1f' % waited)
+            .replace('{wait_left_time}', '%.1f' % (wait_time - waited))
+    )  # text为JSON字符串，要用str.format()需要把输入字符串里JSON的括号给转义了
     progress_bar.value(100).color(color).style(style).show(player)
     # 循环
     while True:
@@ -327,11 +328,11 @@ def wait_bar(wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NO
             break
         val = int(((wait_time-waited)/wait_time if fall else waited/wait_time)*100)
         progress_bar.value(val if val > 0 else 0)
-        progress_bar.text(text.format(
-            waite_time=('%.1f' % wait_time),
-            wait_passed_time=('%.1f' % waited),
-            wait_left_time=('%.1f' % (wait_time - waited))
-        ))
+        progress_bar.text(
+            text.replace('{waite_time}', '%.1f' % wait_time)
+                .replace('{wait_passed_time}', '%.1f' % waited)
+                .replace('{wait_left_time}', '%.1f' % (wait_time - waited))
+        )
         time.sleep(update_interval)
         waited += update_interval
 
