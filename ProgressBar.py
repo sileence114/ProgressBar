@@ -131,7 +131,7 @@ class Bar(object):
 
     def color(self, color=None):
         """
-        BarColor 设置/获取Bar的颜色 若标题的JSON里面没有设置颜色 那也一并设置了
+        BarColor 设置/获取Bar的颜色
         :param color: 输入设置值 留空则返回颜色 请务必使用枚举类BarColor
         :type color: None, BarColor
         :return: 若输入值则返回self 否则返回颜色
@@ -277,7 +277,7 @@ def wait_bar(wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NO
     :type player: str
     :param text: 倒计时文字 必须为有效的"原始JSON文本格式"(暂时不支持RText，Fallen_Breath.lazy) 请自行校验 可使用占位符：{waite_time}-等待总时间 {wait_left_time}-剩余时间 {wait_passed_time}-已等待时间 如:'"请等待{wait_left_time}秒... {wait_passed_time}/{waite_time}"'
     :type text: str
-    :param color: 设置Bar的颜色 若标题的JSON里面没有设置颜色 那也一并设置了
+    :param color: 设置Bar的颜色
     :type color: BarColor
     :param style: 设置Bar的样式
     :type style: BarStyle
