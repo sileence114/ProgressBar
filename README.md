@@ -48,12 +48,13 @@
 > |`{wait_passed_time}`|已等待时间|
 > |`{wait_left_time}`|剩余时间|
 > 
-> `color`与`style`分别输入`BarColor`与`BarStyle`枚举类，请参考下文“类-BarColor/BarStyle”。
+> `color`与`style`分别输入`BarColor`与`BarStyle`枚举类，请参考下文“枚举类-BarColor/BarStyle”。
 > 
 > `fall`值为True则倒计时过程中条的值递减（0%->100%），False递增（100%->0%）。
 
 ## Bar类
 通过Bar类可以通过创建对象的方式创建bossbar，很方便的修改、获取bossbar的参数。
+关于Bar类的具体使用实例请阅读静态方法`wait_bar()`相关的源码。
 
 ### 成员变量
 **请通过Getter/Setter方法访问成员变量！**
@@ -71,7 +72,7 @@ Setter会更改配置到minecraft，直接更改变量会导致很多问题！
 |\_\_del\_count|0|析构执行计数 避免无尽套娃|无|无|
 |\_\_deleted|False|记录是否从minecraft中删除|无|无|
 
-### 构造函数 \_\_init\_\_(self, text, id=None)
+### 构造 \_\_init\_\_(self, text, id=None)
 
 |参数|类型|描述|默认值|
 |----|----|----|----|
@@ -84,7 +85,71 @@ Setter会更改配置到minecraft，直接更改变量会导致很多问题！
 > `text`为[`原始JSON文本格式`](https://minecraft-zh.gamepedia.com/%E5%8E%9F%E5%A7%8BJSON%E6%96%87%E6%9C%AC%E6%A0%BC%E5%BC%8F)，需要自行验证格式，暂不支持直接输入RText（Fallen_Breath.lazy）。
 > `id`作为寻找Bar对象的键，不可重复，若与现有的重复，则会与没有指定一样分配一个随机的UUID。
 
-## 还在施工，先commit一下吧……
+### 获取创建时间 get_time(self)
+返回创建时的time.time()
+
+### 删除 delete(self)
+删除Bar，并从Bars中删除自己，从minecraft中删除bossbar。
+
+### 显示给玩家 show(self, player)
+将bossbar显示给玩家。
+
+|参数|类型|描述|默认值|
+|----|----|----|----|
+|player|str|玩家名称 或@选择器|必须项|
+
+### 获取ID get_id(self)
+返回Bar的ID。
+> 请注意：bossbar在minecraft中的id为：`pb:{ID}`。
+
+### 设置/获取标题 text(self, text=None)
+当参数`text`的值为字符串时，设置标题，返回self；
+参数`text`的值为None时，返回标题。
+
+|参数|类型|描述|默认值|
+|----|----|----|----|
+|text|str|标题|None|
+> `text`必须为"原始JSON文本格式"(暂时不支持RText，Fallen_Breath.lazy) 请自行校验 如：'{"text": "BarBar"}'。
+
+### 设置/获取颜色 color(self, color=None)
+当参数`color`的值为枚举类`BarColor`的实例时，设置颜色，返回self；
+否则，返回颜色。
+
+|参数|类型|描述|默认值|
+|----|----|----|----|
+|color|BarColor|颜色|None|
+
+### 设置/获取样式 style(self, style=None)
+当参数`style`的值为枚举类`BarStyle`的实例时，设置样式，返回self；
+否则，返回样式。
+
+|参数|类型|描述|默认值|
+|----|----|----|----|
+|style|BarStyle|样式|None|
+
+### 设置/获取最大值 max(self, max_=None)
+当参数`max_`的类型为int，且大于0、小于等于2147483647时，设置最大值，并返回self；
+否则，返回当前的最大值。
+
+|参数|类型|描述|默认值|
+|----|----|----|----|
+|max_|int|最大值|None|
+
+### 设置/获取值 value(self, value=None)
+当参数`value`的类型为int，且大于等于0、小于等于`max()`时，设置值，并返回self；
+否则，返回当前的值。
+
+|参数|类型|描述|默认值|
+|----|----|----|----|
+|value|int|值|None|
+
+### 设置/获取可见性 visible(self, visible=None)
+当参数`visible`的类型为bool，设置可见性，并返回self；
+否则，返回当前的可见性。
+
+|参数|类型|描述|默认值|
+|----|----|----|----|
+|value|int|最大值|None|
 
 ## 枚举类
 ### BarColor
