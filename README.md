@@ -2,7 +2,7 @@
 
 > 灵感来源于Bukkit端插件CMI
 
-通过封装/bossbar实现的进度条。
+通过封装[`/bossbar`](https://minecraft-zh.gamepedia.com/%E5%91%BD%E4%BB%A4/bossbar)实现的进度条。
 
 
 
