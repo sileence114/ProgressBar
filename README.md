@@ -4,12 +4,10 @@
 
 通过封装[`/bossbar`](https://minecraft-zh.gamepedia.com/%E5%91%BD%E4%BB%A4/bossbar)实现的进度条。
 
-
-
 ## 所需模块
-- `uuid`
-### 安装
-- `pip install uuid`
+|名称|安装|
+|----|----|
+|uuid|`pip install uuid`|
 
 ## 快速上手
 安装至MCDR后登陆服务器，输入：
@@ -30,7 +28,7 @@
 |----|----|----|----|
 |wait_time|int,float|等待时间（秒）|必须项|
 |player|str|玩家名称或@选择器|必须项|
-|text|str|条的文本|'"请等待{wait_left_time}秒... {wait_passed_time}/{waite_time}"'|
+|text|str|条的文本|'请等待§c§l{wait_left_time}§r秒... §c§l{wait_passed_time}§r/§c§l{waite_time}'|
 |color|BarColor|条的颜色|BarColor.WHITE|
 |style|BarStyle|条的样式|BarStyle.NOTCHED_10|
 |update_interval|int,float|更新间隔（秒）|0.5|
@@ -40,7 +38,7 @@
 >
 > `player`用于命令`/bossbar set <id> players <players>`中<players>的值。
 > 
-> `text`为[`原始JSON文本格式`](https://minecraft-zh.gamepedia.com/%E5%8E%9F%E5%A7%8BJSON%E6%96%87%E6%9C%AC%E6%A0%BC%E5%BC%8F)，需要自行验证格式，暂不支持直接输入RText（Fallen_Breath.lazy）。可使用如下占位符：
+> `text`为字符串，可用`§`样式代码。因为要使用`str.replace()`将占位符替换为相应的值，故不可用`RText`和`RTextList`。
 > 
 > |占位符|替换值|
 > |----|----|
@@ -72,18 +70,18 @@ Setter会更改配置到minecraft，直接更改变量会导致很多问题！
 |\_\_del\_count|0|析构执行计数 避免无尽套娃|无|无|
 |\_\_deleted|False|记录是否从minecraft中删除|无|无|
 
-### 构造 \_\_init\_\_(self, text, id=None)
+### 构造 \_\_init\_\_(self, text, id_=None)
 
 |参数|类型|描述|默认值|
 |----|----|----|----|
-|text|str|bossbar的标题|必须项|
-|id|str|Bar对象的ID|uuid.uuid4()|
+|text|str,RText,RTextList|bossbar的标题|必须项|
+|id_|str|Bar对象的ID|uuid.uuid4()|
 
-在构造时，会通过`bossbar`命令创建id为`pb:{id}`的bossbar，所以请不要手动通过命令修改命名空间为`pb`的bossbar！
-当Bar成功创建时，会自动将自己添加到全局的字典变量Bars，key为`id`。
+在Bar对象创建时，会通过`bossbar`命令创建id为`pb:{id_}`的bossbar，所以请不要手动通过命令修改命名空间为`pb`的bossbar！
+当Bar成功创建，会以`id_`作为key将自己添加到全局字典`Bars`。
 
-> `text`为[`原始JSON文本格式`](https://minecraft-zh.gamepedia.com/%E5%8E%9F%E5%A7%8BJSON%E6%96%87%E6%9C%AC%E6%A0%BC%E5%BC%8F)，需要自行验证格式，暂不支持直接输入RText（Fallen_Breath.lazy）。
-> `id`作为寻找Bar对象的键，不可重复，若与现有的重复，则会与没有指定一样分配一个随机的UUID。
+> `text`可用使用带有样式代码`§`的字符串，也可以是`RText`和`RTextList`的实例，但最终会处理为[`原始JSON文本格式`](https://minecraft-zh.gamepedia.com/%E5%8E%9F%E5%A7%8BJSON%E6%96%87%E6%9C%AC%E6%A0%BC%E5%BC%8F)到成员变量`_text`上。
+> `id_`作为寻找Bar对象的键，不可重复，若与现有的重复，则会与没有指定一样分配一个随机的UUID。
 
 ### 获取创建时间 get_time(self)
 返回创建时的time.time()
@@ -100,16 +98,16 @@ Setter会更改配置到minecraft，直接更改变量会导致很多问题！
 
 ### 获取ID get_id(self)
 返回Bar的ID。
-> 请注意：bossbar在minecraft中的id为：`pb:{ID}`。
+> 请注意：bossbar在minecraft中的ID为：`pb:{ID}`。
 
 ### 设置/获取标题 text(self, text=None)
-当参数`text`的值为字符串时，设置标题，返回self；
+当参数`text`的值为字符串或RText,RTextList实例时，设置标题，返回self；
 参数`text`的值为None时，返回标题。
 
 |参数|类型|描述|默认值|
 |----|----|----|----|
-|text|str|标题|None|
-> `text`必须为"原始JSON文本格式"(暂时不支持RText，Fallen_Breath.lazy) 请自行校验 如：'{"text": "BarBar"}'。
+|text|str,RText,RTextList|标题|None|
+> 与构造函数中的`text`参数类似，`text`也可以使用带有样式代码`§`的字符串和`RText`、`RTextList`的实例，最终也会处理为[`原始JSON文本格式`](https://minecraft-zh.gamepedia.com/%E5%8E%9F%E5%A7%8BJSON%E6%96%87%E6%9C%AC%E6%A0%BC%E5%BC%8F)到成员变量`_text`上。
 
 ### 设置/获取颜色 color(self, color=None)
 当参数`color`的值为枚举类`BarColor`的实例时，设置颜色，返回self；
