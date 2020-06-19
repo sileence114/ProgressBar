@@ -3,27 +3,35 @@ import uuid
 from enum import Enum
 import time
 
+from utils.rtext import *
+
 # 请在此配置插件
 # 请不要修改key
 PB_CONFIG = {
     'user_interface': {
         'enable': True,
         'prefix': '!!pb',
-        'help_msg': '''------ §aMCDR ProgressBar插件帮助信息 §f------
-§b{prefix} [help] §f- §c显示此帮助信息
-§b{prefix} timer <time> [user] §f- §c显示一个简易计时器
-§7<time>:时间(秒) [user]:显示的玩家(默认自己)
---------------------------------''',
-        'timer': {
-            'use_permission_limit': (1, 2, 3, 4),
-            '@a_permission_limit': (2, 3, 4)
+        'help_message_container': [
+            '------ §aMCDR ProgressBar插件帮助信息 §r------',
+            '--------------------------------'
+        ],
+        'sub_command': {
+            'help': {
+                'help_msg': '§b{prefix} [help] §f- §c显示此帮助信息'
+            },
+            'timer': {
+                'use_permission_limit': (1, 2, 3, 4),
+                '@a_permission_limit': (2, 3, 4),
+                'help_msg': '§b{prefix} timer <time> [user] §f- §c显示一个简易计时器\n§7<time>:时间(秒) [user]:显示的玩家(默认自己)'
+            }
         }
     },
 }
 
-PB_CONFIG['user_interface']['help_msg'] = PB_CONFIG['user_interface']['help_msg'].format(
-    prefix=PB_CONFIG['user_interface']['prefix']
-)
+
+for key in PB_CONFIG['user_interface']['sub_command'].keys():
+    PB_CONFIG['user_interface']['sub_command'][key]['help_msg'] = \
+        PB_CONFIG['user_interface']['sub_command'][key]['help_msg'].format(prefix=PB_CONFIG['user_interface']['prefix'])
 
 server_instance = None
 if_server_alive = False
@@ -49,11 +57,11 @@ class BarStyle(Enum):
 
 
 class Bar(object):
-    def __init__(self, text, id=None):
+    def __init__(self, text, id_=None):
         """
-        :param text: 必须为"原始JSON文本格式"(暂时不支持RText，Fallen_Breath.lazy)
-        :type text: str
-        :param id:
+        :param text: 标题，将双引号转义，富文本请用RText
+        :type text: str, RText, RTextList
+        :param id_:
         """
         self._color = BarColor.WHITE
         self._style = BarStyle.PROGRESS
@@ -63,18 +71,24 @@ class Bar(object):
         self.__del_count = 0
         self.__deleted = False
         if server_instance is not None and if_server_alive:
-            if id is None or id in Bars.keys():
-                id = uuid.uuid4()
-            self._id = id
-            self._text = text
+            if id_ is None or id_ in Bars.keys():
+                id_ = uuid.uuid4()
+            if isinstance(text, RTextBase):
+                self._text = text.to_json_str()
+            else:
+                self._text = '"%s"' % str(text).replace('"', '\\"')
+            self._id = id_
             self._time = time.time()
-            server_instance.execute(f'bossbar add pb:{id} {text}')
-            Bars[id] = self
+            server_instance.execute(f'bossbar add pb:{id_} {self._text}')
+            Bars[id_] = self
         else:
             server_instance.logger.info(
-                f'Bar创建失败！原因：{"[插件未加载]" if server_instance is None else ""}{"[服务端未就绪]" if not if_server_alive else ""}')
+                'Bar创建失败！原因：' +
+                ("[插件未加载]" if server_instance is None else "") +
+                ("[服务端未就绪]" if not if_server_alive else "")
+            )
             server_instance.logger.debug('未准备就绪时的Bar创建失败：')
-            server_instance.logger.debug(f' - text: "{text}" id: "{id}"')
+            server_instance.logger.debug(f' - text: "{text}" id: "{id_}"')
 
     def __del__(self):
         if self.__del_count < 2:
@@ -120,16 +134,17 @@ class Bar(object):
 
     def text(self, text=None):
         """
-        str 设置/获取Bar的标题 必须为"原始JSON文本格式"(暂时不支持RText，Fallen_Breath.lazy) 请自行校验 如：
-        '{"text": "BarBar"}'
-        具体请参照 https://minecraft-zh.gamepedia.com/%E5%8E%9F%E5%A7%8BJSON%E6%96%87%E6%9C%AC%E6%A0%BC%E5%BC%8F
+        str 设置/获取Bar的标题，双引号会被转义，富文本请用RText
         :param text: 输入设置值 留空则返回标题
-        :type text: None, bool
+        :type text: None, str, RText, RTextList
         :return: 若输入值则返回self 否则返回标题
         """
         if text is not None:
-            self._text = text
-            server_instance.execute(f'bossbar set pb:{self._id} name {text}')
+            if isinstance(text, RTextBase):
+                self._text = text.to_json_str()
+            else:
+                self._text = '"%s"' % str(text).replace('"', '\\"')
+            server_instance.execute(f'bossbar set pb:{self._id} name {self._text}')
             return self
         else:
             return self._text
@@ -235,8 +250,16 @@ def on_info(server, info):
         args = info.content.split(' ')
         if args[0] == PB_CONFIG['user_interface']['prefix']:
             if len(args) == 1 or args[1] == 'help':
-                server_instance.reply(info, PB_CONFIG['user_interface']['help_msg'])
-            elif len(args) in (3, 4) and args[1] == 'timer' and server_instance.get_permission_level(info) in PB_CONFIG['user_interface']['timer']['use_permission_limit']:
+                permission_level = server_instance.get_permission_level(info)
+                msg = PB_CONFIG['user_interface']['sub_command']['help']['help_msg']
+                if permission_level in PB_CONFIG['user_interface']['sub_command']['timer']['use_permission_limit']:
+                    msg += PB_CONFIG['user_interface']['sub_command']['timer']['help_msg']
+                server_instance.reply(info, '%s\n%s\n%s'%(
+                    PB_CONFIG['user_interface']['help_message_container'][0],
+                    msg,
+                    PB_CONFIG['user_interface']['help_message_container'][1]
+                ))
+            elif len(args) in (3, 4) and args[1] == 'timer' and server_instance.get_permission_level(info) in PB_CONFIG['user_interface']['sub_command']['timer']['use_permission_limit']:
                 try:
                     t = float(args[2])
                 except ValueError as e:
@@ -249,7 +272,7 @@ def on_info(server, info):
                         return
                 else:
                     p = args[3]
-                    if p[0] == '@' and server_instance.get_permission_level(info) not in PB_CONFIG['user_interface']['timer']['@a_permission_limit']:
+                    if p[0] == '@' and server_instance.get_permission_level(info) not in PB_CONFIG['user_interface']['sub_command']['timer']['@a_permission_limit']:
                         server_instance.reply(info, "你没有权限这样做！")
                         return
                 wait_bar(wait_time=t, player=p)
@@ -280,7 +303,7 @@ def wait_bar(wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NO
     :type wait_time: float, int
     :param player: 显示给指定玩家 输入玩家ID或@选择器
     :type player: str
-    :param text: 倒计时文字 必须为有效的"原始JSON文本格式"(暂时不支持RText，Fallen_Breath.lazy) 请自行校验 可使用占位符：{waite_time}-等待总时间 {wait_left_time}-剩余时间 {wait_passed_time}-已等待时间 如:'"请等待{wait_left_time}秒... {wait_passed_time}/{waite_time}"'
+    :param text: 倒计时文字 可使用占位符：{waite_time}-等待总时间 {wait_left_time}-剩余时间 {wait_passed_time}-已等待时间 如:'请等待§c§l{wait_left_time}§r秒... §c§l{wait_passed_time}§r/§c§l{waite_time}§r'
     :type text: str
     :param color: 设置Bar的颜色
     :type color: BarColor
@@ -300,7 +323,7 @@ def wait_bar(wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NO
             raise e
     wait_time = round(int((wait_time + 0.025) / 0.05) * 0.05, 2)
     if text in ("", None):
-        text = '"请等待{wait_left_time}秒... {wait_passed_time}/{waite_time}"'
+        text = '请等待§c§l{wait_left_time}§r秒... §c§l{wait_passed_time}§r/§c§l{waite_time}§r'
     if color is not None and type(color) is BarColor:
         color = BarColor.WHITE
     if style is not None and type(style) is BarStyle:
