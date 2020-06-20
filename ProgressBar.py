@@ -10,10 +10,10 @@ PB_CONFIG = {
     'user_interface': {
         'enable': True,
         'prefix': '!!pb',
-        'help_message_container': [
+        'help_message_container': (
             '------ §aMCDR ProgressBar插件帮助信息 §r------',
             '--------------------------------'
-        ],
+        ),
         'sub_command': {
             'help': {
                 'use_permission_limit': (0, 1, 2, 3, 4),
@@ -21,13 +21,13 @@ PB_CONFIG = {
             },
             'timer': {
                 'use_permission_limit': (1, 2, 3, 4),
-                '@a_permission_limit': (2, 3, 4),
+                '@a_permission_limit': (2, 3, 4),  # 在[user]参数中填入@a的权限限制
                 'help_msg': '§b{prefix} timer <time> [user] §f- §c显示一个简易计时器\n§7<time>:时间(秒) [user]:显示的玩家(默认自己)'
             },
             'list': {
                 'use_permission_limit': (2, 3, 4),
-                'delete_permission_limit': (3, 4),
-                'help_msg': '§b{prefix} list §f- §c显示所有Bar对象的实例'
+                'delete_permission_limit': (3, 4),  # 删除权限限制，还没有实现，咕咕咕。
+                'help_msg': '§b{prefix} list §f- §c通过列表的形式展示所有的Bar对象的实例'
             }
         }
     }
