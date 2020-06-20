@@ -194,3 +194,10 @@ Setter会更改配置到minecraft，直接更改变量会导致很多问题！
 > |`/bossbar set bar:test color white`|白色|
 > |`/bossbar set bar:test color yellow`|黄色|
 > 5. 最后记得把刚刚创建的bossbar删掉：`/bossbar remove bar:test`。
+
+## 配置字典变量
+### 注意事项
+1. 使用文本编辑器打开ProgressBar.py，推荐使用`Sublime`、`VSCode`等编辑器打开；
+2. 除非你知道自己操作的后果，否则请不要增减`缩进`、修改`键`、以及`PB_CONFIG`变量以外的其他内容；
+3. 
+## Chrome更新了要重启，先commit一下……
