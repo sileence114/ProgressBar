@@ -254,7 +254,7 @@ PB_CONFIG = {
 |键|描述|默认|
 |----|----|----|
 |`help`|帮助命令的相关|{'use_permission_limit': (0, 1, 2, 3, 4),<br>'help_msg': '§b{prefix} [help] §f- §c显示此帮助信息'}|
-|`timer`|计时器相关|{'use_permission_limit': (1, 2, 3, 4),<br>'@a_permission_limit': (2, 3, 4),<br>'help_msg': '§b{prefix} timer <time> [user] §f- §c显示一个简易计时器\n§7<time>:时间(秒) [user]:显示的玩家(默认自己)'}|
+|`timer`|计时器相关|{'use_permission_limit': (1, 2, 3, 4),<br>'@a_permission_limit': (2, 3, 4),<br>'help_msg': '§b{prefix} timer \<time\> \[user\] §f- §c显示一个简易计时器\n§7\<time\>:时间(秒) \[user\]:显示的玩家(默认自己)'}|
 |`list`|Bar实例列表相关|{'use_permission_limit': (2, 3, 4),<br>'delete_permission_limit': (3, 4),<br>'help_msg': '§b{prefix} list §f- §c通过列表的形式展示所有的Bar对象的实例'}|
 
 #### sub_command子节点
@@ -263,8 +263,14 @@ PB_CONFIG = {
 |键|描述|举栗|
 |----|----|----|
 |`use_permission_limit`|子命令使用权限等级限制<br>仅元组内列举的权限等级才能被运行使用该命令|(2, 3, 4)|
-|`*_permission_limit`|子命令的具体功能限制|(3, 4)|
+|`*_permission_limit`|子命令的具体功能限制|(4,)|
 |`help_msg`|用于在帮助列表显示的描述|'§b{prefix} [help] §f- §c显示此帮助信息'|
 
+**特性警告**
+
+请注意，权限配置的小括号`()`内若只填写了一个数字，比如我只希望这个子命令提供给权限等级为4的`owner`，那**不能**写`(4)`，而**应该**写成`(4,)`，或`\[4\]`。
+> 具体原因涉及到Python中`小括号定义元组`与`小括号改变运输优先级`的冲突，请自行搜索`Python 元组 定义`。因元组只读的特性，能减少些许的内存占用，因此不太推荐上文`\[4\]`的写法。（中括号定义了一个列表，能被修改，list对象实例中需要存放修改相关的方法，故内存占用就能会多一点）
+
 > `help_msg`中使用`{prefix}`作为前缀的占位符。
->> 因使用了`str.format()`，所以若想显示大括号则需要转义（`{`->`{{`，`}`->`}}`）。
+> > 因使用了`str.format()`，所以若想显示大括号则需要转义（`{`->`{{`，`}`->`}}`）。
+
