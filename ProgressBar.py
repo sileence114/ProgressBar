@@ -5,8 +5,7 @@ import time
 
 from utils.rtext import *
 
-# 请在此配置插件
-# 请不要修改key
+# ---------- 下方PB_CONFIG变量为可配置变量 请不要修改key 不要增加/减少缩进 ----------
 PB_CONFIG = {
     'user_interface': {
         'enable': True,
@@ -17,17 +16,23 @@ PB_CONFIG = {
         ],
         'sub_command': {
             'help': {
+                'use_permission_limit': (0, 1, 2, 3, 4),
                 'help_msg': '§b{prefix} [help] §f- §c显示此帮助信息'
             },
             'timer': {
                 'use_permission_limit': (1, 2, 3, 4),
                 '@a_permission_limit': (2, 3, 4),
                 'help_msg': '§b{prefix} timer <time> [user] §f- §c显示一个简易计时器\n§7<time>:时间(秒) [user]:显示的玩家(默认自己)'
+            },
+            'list': {
+                'use_permission_limit': (2, 3, 4),
+                'delete_permission_limit': (3, 4),
+                'help_msg': '§b{prefix} list §f- §c显示所有Bar对象的实例'
             }
         }
-    },
+    }
 }
-
+# ---------- 可配置变量到此结束 下为插件正文 请不要修改 ----------
 
 for key in PB_CONFIG['user_interface']['sub_command'].keys():
     PB_CONFIG['user_interface']['sub_command'][key]['help_msg'] = \
@@ -54,6 +59,17 @@ class BarStyle(Enum):
     NOTCHED_12 = 2
     NOTCHED_20 = 3
     PROGRESS = 4
+
+
+BarColor_to_RText = {
+    BarColor.BLUE: RColor.blue,
+    BarColor.GREEN: RColor.green,
+    BarColor.PINK: RColor.light_purple,
+    BarColor.PURPLE: RColor.dark_purple,
+    BarColor.RED: RColor.red,
+    BarColor.WHITE: RColor.white,
+    BarColor.YELLOW: RColor.yellow
+}
 
 
 class Bar(object):
@@ -140,11 +156,12 @@ class Bar(object):
         :return: 若输入值则返回self 否则返回标题
         """
         if text is not None:
-            if isinstance(text, RTextBase):
-                self._text = text.to_json_str()
-            else:
-                self._text = '"%s"' % str(text).replace('"', '\\"')
-            server_instance.execute(f'bossbar set pb:{self._id} name {self._text}')
+            if text != self._text:
+                if isinstance(text, RTextBase):
+                    self._text = text.to_json_str()
+                else:
+                    self._text = '"%s"' % str(text).replace('"', '\\"')
+                server_instance.execute(f'bossbar set pb:{self._id} name {self._text}')
             return self
         else:
             return self._text
@@ -157,8 +174,9 @@ class Bar(object):
         :return: 若输入值则返回self 否则返回颜色
         """
         if type(color) is BarColor:
-            self._color = color
-            server_instance.execute(f'bossbar set pb:{self._id} color {color.name.lower()}')
+            if color != self._color:
+                self._color = color
+                server_instance.execute(f'bossbar set pb:{self._id} color {color.name.lower()}')
             return self
         else:
             return self._color
@@ -171,8 +189,9 @@ class Bar(object):
         :return: 若输入值则返回self 否则返回样式
         """
         if type(style) is BarStyle:
-            self._style = style
-            server_instance.execute(f'bossbar set pb:{self._id} style {style.name.lower()}')
+            if style != self._style:
+                self._style = style
+                server_instance.execute(f'bossbar set pb:{self._id} style {style.name.lower()}')
             return self
         else:
             return self._style
@@ -185,8 +204,9 @@ class Bar(object):
         :return: 若输入值则返回self 否则返回最大值
         """
         if type(max_) is int and 2147483647 >= max_ > 0:
-            self._max = max_
-            server_instance.execute(f'bossbar set pb:{self._id} max {max_}')
+            if max_ != self._max:
+                self._max = max_
+                server_instance.execute(f'bossbar set pb:{self._id} max {max_}')
             return self
         else:
             return self._max
@@ -199,8 +219,9 @@ class Bar(object):
         :return: 若输入值则返回self 否则返回值
         """
         if type(value) is int and self._max >= value >= 0:
-            self._value = value
-            server_instance.execute(f'bossbar set pb:{self._id} value {value}')
+            if value != self._value:
+                self._value = value
+                server_instance.execute(f'bossbar set pb:{self._id} value {value}')
             return self
         else:
             return self._value
@@ -213,8 +234,9 @@ class Bar(object):
         :return: 若输入值则返回self 否则返回可见性
         """
         if type(visible) is bool:
-            self._visible = visible
-            server_instance.execute(f'bossbar set pb:{self._id} visible {str(visible).lower()}')
+            if visible != self._visible:
+                self._visible = visible
+                server_instance.execute(f'bossbar set pb:{self._id} visible {str(visible).lower()}')
             return self
         else:
             return self._visible
@@ -251,10 +273,11 @@ def on_info(server, info):
         if args[0] == PB_CONFIG['user_interface']['prefix']:
             if len(args) == 1 or args[1] == 'help':
                 permission_level = server_instance.get_permission_level(info)
-                msg = PB_CONFIG['user_interface']['sub_command']['help']['help_msg']
-                if permission_level in PB_CONFIG['user_interface']['sub_command']['timer']['use_permission_limit']:
-                    msg += PB_CONFIG['user_interface']['sub_command']['timer']['help_msg']
-                server_instance.reply(info, '%s\n%s\n%s'%(
+                msg = ''
+                for key in PB_CONFIG['user_interface']['sub_command'].keys():
+                    if permission_level in PB_CONFIG['user_interface']['sub_command'][key]['use_permission_limit']:
+                        msg += '\n%s' % PB_CONFIG['user_interface']['sub_command'][key]['help_msg']
+                server_instance.reply(info, '%s%s\n%s' % (
                     PB_CONFIG['user_interface']['help_message_container'][0],
                     msg,
                     PB_CONFIG['user_interface']['help_message_container'][1]
@@ -276,6 +299,30 @@ def on_info(server, info):
                         server_instance.reply(info, "你没有权限这样做！")
                         return
                 wait_bar(wait_time=t, player=p)
+            elif len(args) == 2 and args[1] == 'list':
+                msg = RTextList(
+                    '------ ',
+                    RText('当前Bar类有', color=RColor.dark_red),
+                    RText(len(Bars), color=RColor.red),
+                    RText('个实例', color=RColor.dark_red),
+                    ' ------\n',
+                )
+                for key in Bars.keys():
+                    msg = RTextList(
+                        msg,
+                        RText(
+                            Bars[key].text() + ' ',
+                            color=BarColor_to_RText[Bars[key].color()]
+                        ).set_hover_text(f'pb:{Bars[key].get_id()}'),
+                        '创建于：',
+                        RText(
+                            time.strftime("%X", time.localtime(Bars[key].get_time())),
+                            color=RColor.gray,
+                            styles=RStyle.italic
+                        ).set_hover_text(time.strftime("%Y-%m-%d %X", time.localtime(Bars[key].get_time()))),
+                        '\n'
+                    )
+                server_instance.reply(info, msg)
             else:
                 server_instance.reply(info, '未知命令')
 
@@ -303,7 +350,7 @@ def wait_bar(wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NO
     :type wait_time: float, int
     :param player: 显示给指定玩家 输入玩家ID或@选择器
     :type player: str
-    :param text: 倒计时文字 可使用占位符：{waite_time}-等待总时间 {wait_left_time}-剩余时间 {wait_passed_time}-已等待时间 如:'请等待§c§l{wait_left_time}§r秒... §c§l{wait_passed_time}§r/§c§l{waite_time}§r'
+    :param text: 倒计时文字 可使用占位符：{waite_time}-等待总时间 {wait_left_time}-剩余时间 {wait_passed_time}-已等待时间 如:'请等待§c§l{wait_left_time}§r秒... §c§l{wait_passed_time}§r/§c§l{waite_time}'
     :type text: str
     :param color: 设置Bar的颜色
     :type color: BarColor
@@ -323,7 +370,7 @@ def wait_bar(wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NO
             raise e
     wait_time = round(int((wait_time + 0.025) / 0.05) * 0.05, 2)
     if text in ("", None):
-        text = '请等待§c§l{wait_left_time}§r秒... §c§l{wait_passed_time}§r/§c§l{waite_time}§r'
+        text = '请等待§c§l{wait_left_time}§r秒... §c§l{wait_passed_time}§r/§c§l{waite_time}'
     if color is not None and type(color) is BarColor:
         color = BarColor.WHITE
     if style is not None and type(style) is BarStyle:
