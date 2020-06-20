@@ -243,7 +243,7 @@ PB_CONFIG = {
 
 |键|描述|默认|
 |----|----|----|
-|`enable`|是否启用用户交互，为False甚至不会在帮助列表中出现|True|
+|`enable`|是否启用用户交互<br>为False甚至不会在帮助列表中出现|True|
 |`prefix`|命令前缀|'!!pb'|
 |`help_message_container`|帮助命令显示容器，为两个元素的元组<br>子命令的帮助信息会加载中间|('------ §aMCDR ProgressBar插件帮助信息 §r------',<br>'--------------------------------')|
 |`sub_command`|子命令配置节点|{'help': {...},'timer': {...},'list': {...}}|
