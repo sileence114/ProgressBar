@@ -16,6 +16,95 @@
 ```
 即可获得一个10秒的倒计时条（确保权限等级>1）。
 
+# 使用
+
+## 命令交互
+命令前缀可以自行配置，子命令所需权限也可以自行更改，请参考下文“可配置字典变量”；
+### !!pb \[help\]
+显示帮助。
+
+### !!pb timer \<time\> \[user\]
+就像前面“快速上手”那样启动一个计时器。
+
+`<time>`：计时器时间（秒）；
+
+`[user]`：显示计时器的用户，可以使用@选择器，@a需要相应权限；选填，默认自己（在控制台必填）。
+
+### !!pb list
+通过列表的形式展示所有的Bar对象的实例。
+
+# 配置
+
+## 可配置字典变量
+### 注意事项
+1. 使用文本编辑器打开ProgressBar.py，推荐使用`Sublime`、`VSCode`等编辑器打开；
+2. 除非你知道自己操作的后果，否则请不要增减`缩进`、修改`键`和`括号`、以及`PB_CONFIG`变量以外的其他内容；
+3. 打开后找到如下代码修改：
+```python
+PB_CONFIG = {
+    'user_interface': {
+        'enable': True,
+        'prefix': '!!pb',
+        'help_message_container': (
+            '------ §aMCDR ProgressBar插件帮助信息 §r------',
+            '--------------------------------'
+        ),
+        'sub_command': {
+            'help': {
+                'use_permission_limit': (0, 1, 2, 3, 4),
+                'help_msg': '§b{prefix} [help] §f- §c显示此帮助信息'
+            },
+            'timer': {
+                'use_permission_limit': (1, 2, 3, 4),
+                '@a_permission_limit': (2, 3, 4),  # 在[user]参数中填入@a的权限限制
+                'help_msg': '§b{prefix} timer <time> [user] §f- §c显示一个简易计时器\n§7<time>:时间(秒) [user]:显示的玩家(默认自己)'
+            },
+            'list': {
+                'use_permission_limit': (2, 3, 4),
+                'help_msg': '§b{prefix} list §f- §c通过列表的形式展示所有的Bar对象的实例'
+            }
+        }
+    }
+}
+```
+### user_interface节点
+这个节点配置用户交互相关事项。
+
+|键|描述|默认|
+|----|----|----|
+|`enable`|是否启用用户交互<br>为False甚至不会在帮助列表中出现|True|
+|`prefix`|命令前缀|'!!pb'|
+|`help_message_container`|帮助命令显示容器，为两个元素的元组<br>子命令的帮助信息会加载中间|('------ §aMCDR ProgressBar插件帮助信息 §r------',<br>'--------------------------------')|
+|`sub_command`|子命令配置节点|{'help': {...},'timer': {...},'list': {...}}|
+
+#### sub_command节点
+这个节点用于设置子命令的使用权限、帮助信息等。
+
+|键|描述|默认|
+|----|----|----|
+|`help`|帮助命令的相关|{'use_permission_limit': (0, 1, 2, 3, 4),<br>'help_msg': '§b{prefix} \[help\] §f- §c显示此帮助信息'}|
+|`timer`|计时器相关|{'use_permission_limit': (1, 2, 3, 4),<br>'@a_permission_limit': (2, 3, 4),<br>'help_msg': '§b{prefix} timer \<time\> \[user\] §f- §c显示一个简易计时器\n§7\<time\>:时间(秒) \[user\]:显示的玩家(默认自己)'}|
+|`list`|Bar实例列表相关|{'use_permission_limit': (2, 3, 4),<br>'delete_permission_limit': (3, 4),<br>'help_msg': '§b{prefix} list §f- §c通过列表的形式展示所有的Bar对象的实例'}|
+
+#### sub_command子节点
+子节点较多，但主要设置一下两类，在此不一一列举。
+
+|键|描述|举栗|
+|----|----|----|
+|`use_permission_limit`|子命令使用权限等级限制<br>仅元组内列举的权限等级才能被运行使用该命令|(2, 3, 4)|
+|`*_permission_limit`|子命令的具体功能限制|(4,)|
+|`help_msg`|用于在帮助列表显示的描述|'§b{prefix} \[help\] §f- §c显示此帮助信息'|
+
+**特性警告**
+
+请注意，权限配置的小括号`()`内若只填写了一个数字，比如我只希望这个子命令提供给权限等级为4的`owner`，那就**不能**写`(4)`，而**应该**写成`(4,)`，或`[4]`。
+> 具体原因涉及到Python中`小括号定义元组`与`小括号改变运输优先级`的冲突，请自行搜索`Python 元组 定义`。因元组只读的特性，能减少些许的内存占用，因此不太推荐上文`[4]`的写法。（中括号定义了一个列表，能被修改，list对象实例中需要存放修改相关的方法，故内存占用就可能会多一点）
+
+> `help_msg`中使用`{prefix}`作为前缀的占位符。
+> > 因使用了`str.format()`，所以若想显示大括号则需要转义（`{`->`{{`，`}`->`}}`）。
+
+# 开发
+
 ## 静态方法
 
 |名称|参数|描述|
@@ -194,83 +283,4 @@ Setter会更改配置到minecraft，直接更改变量会导致很多问题！
 > |`/bossbar set bar:test color white`|白色|
 > |`/bossbar set bar:test color yellow`|黄色|
 > 5. 最后记得把刚刚创建的bossbar删掉：`/bossbar remove bar:test`。
-
-## 命令交互
-命令前缀可以自行配置，子命令所需权限也可以自行更改，请参考下文“可配置字典变量”；
-### !!pb timer \<time\> \[user\]
-就像前面“快速上手”那样启动一个计时器。
-`\<time\>`：计时器时间（秒）；
-`\[user\]`：显示计时器的用户，可以使用@选择器，@a需要相应权限；选填，默认自己（在控制台必填）。
-
-### !!pb list
-通过列表的形式展示所有的Bar对象的实例。
-
-## 可配置字典变量
-### 注意事项
-1. 使用文本编辑器打开ProgressBar.py，推荐使用`Sublime`、`VSCode`等编辑器打开；
-2. 除非你知道自己操作的后果，否则请不要增减`缩进`、修改`键`和`括号`、以及`PB_CONFIG`变量以外的其他内容；
-3. 打开后找到如下代码修改：
-```python
-PB_CONFIG = {
-    'user_interface': {
-        'enable': True,
-        'prefix': '!!pb',
-        'help_message_container': (
-            '------ §aMCDR ProgressBar插件帮助信息 §r------',
-            '--------------------------------'
-        ),
-        'sub_command': {
-            'help': {
-                'use_permission_limit': (0, 1, 2, 3, 4),
-                'help_msg': '§b{prefix} [help] §f- §c显示此帮助信息'
-            },
-            'timer': {
-                'use_permission_limit': (1, 2, 3, 4),
-                '@a_permission_limit': (2, 3, 4),  # 在[user]参数中填入@a的权限限制
-                'help_msg': '§b{prefix} timer <time> [user] §f- §c显示一个简易计时器\n§7<time>:时间(秒) [user]:显示的玩家(默认自己)'
-            },
-            'list': {
-                'use_permission_limit': (2, 3, 4),
-                'delete_permission_limit': (3, 4),  # 删除权限限制，还没有实现，咕咕咕。
-                'help_msg': '§b{prefix} list §f- §c通过列表的形式展示所有的Bar对象的实例'
-            }
-        }
-    }
-}
-```
-### user_interface节点
-这个节点配置用户交互相关事项。
-
-|键|描述|默认|
-|----|----|----|
-|`enable`|是否启用用户交互<br>为False甚至不会在帮助列表中出现|True|
-|`prefix`|命令前缀|'!!pb'|
-|`help_message_container`|帮助命令显示容器，为两个元素的元组<br>子命令的帮助信息会加载中间|('------ §aMCDR ProgressBar插件帮助信息 §r------',<br>'--------------------------------')|
-|`sub_command`|子命令配置节点|{'help': {...},'timer': {...},'list': {...}}|
-
-#### sub_command节点
-这个节点用于设置子命令的使用权限、帮助信息等。
-
-|键|描述|默认|
-|----|----|----|
-|`help`|帮助命令的相关|{'use_permission_limit': (0, 1, 2, 3, 4),<br>'help_msg': '§b{prefix} \[help\] §f- §c显示此帮助信息'}|
-|`timer`|计时器相关|{'use_permission_limit': (1, 2, 3, 4),<br>'@a_permission_limit': (2, 3, 4),<br>'help_msg': '§b{prefix} timer \<time\> \[user\] §f- §c显示一个简易计时器\n§7\<time\>:时间(秒) \[user\]:显示的玩家(默认自己)'}|
-|`list`|Bar实例列表相关|{'use_permission_limit': (2, 3, 4),<br>'delete_permission_limit': (3, 4),<br>'help_msg': '§b{prefix} list §f- §c通过列表的形式展示所有的Bar对象的实例'}|
-
-#### sub_command子节点
-子节点较多，但主要设置一下两类，在此不一一列举。
-
-|键|描述|举栗|
-|----|----|----|
-|`use_permission_limit`|子命令使用权限等级限制<br>仅元组内列举的权限等级才能被运行使用该命令|(2, 3, 4)|
-|`*_permission_limit`|子命令的具体功能限制|(4,)|
-|`help_msg`|用于在帮助列表显示的描述|'§b{prefix} \[help\] §f- §c显示此帮助信息'|
-
-**特性警告**
-
-请注意，权限配置的小括号`()`内若只填写了一个数字，比如我只希望这个子命令提供给权限等级为4的`owner`，那就**不能**写`(4)`，而**应该**写成`(4,)`，或`[4]`。
-> 具体原因涉及到Python中`小括号定义元组`与`小括号改变运输优先级`的冲突，请自行搜索`Python 元组 定义`。因元组只读的特性，能减少些许的内存占用，因此不太推荐上文`[4]`的写法。（中括号定义了一个列表，能被修改，list对象实例中需要存放修改相关的方法，故内存占用就可能会多一点）
-
-> `help_msg`中使用`{prefix}`作为前缀的占位符。
-> > 因使用了`str.format()`，所以若想显示大括号则需要转义（`{`->`{{`，`}`->`}}`）。
 
