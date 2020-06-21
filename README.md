@@ -105,6 +105,16 @@ PB_CONFIG = {
 
 # 开发
 
+## 注意事项
+1. 不要直接`import plugins.ProgressBar`，而是在`on_load()`阶段使用`server.get_plugin_instance('ProgressBar.py')`，通过MCDR获取正在运行的插件实例。
+2. 若有必要，可以将实例保存到自己的插件全局变量中。**在服务器未就绪的情况下，无法实例化Bar类，请注意。**
+3. 可以参考改造完成的插件以及ProgressBar.py中的静态方法等。
+
+> 使用了ProgressBar改造了的其他插件
+> |原插件|改造后|
+> |----|----|
+> |[QuickBackupM](https://github.com/TISUnion/QuickBackupM)|[QuickBackupM-PB](https://github.com/Preliterate/QuickBackupM-PB)|
+
 ## 静态方法
 
 |名称|参数|描述|
