@@ -26,7 +26,6 @@ PB_CONFIG = {
             },
             'list': {
                 'use_permission_limit': (2, 3, 4),
-                'delete_permission_limit': (3, 4),  # 删除权限限制，还没有实现，咕咕咕。
                 'help_msg': '§b{prefix} list §f- §c通过列表的形式展示所有的Bar对象的实例'
             }
         }
