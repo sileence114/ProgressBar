@@ -87,7 +87,7 @@ PB_CONFIG = {
 |`list`|Bar实例列表相关|{'use_permission_limit': (2, 3, 4),<br>'delete_permission_limit': (3, 4),<br>'help_msg': '§b{prefix} list §f- §c通过列表的形式展示所有的Bar对象的实例'}|
 
 #### sub_command子节点
-子节点较多，但主要设置一下两类，在此不一一列举。
+子节点较多，但主要设置以下两类，在此不一一列举。
 
 |键|描述|举栗|
 |----|----|----|
@@ -113,6 +113,8 @@ PB_CONFIG = {
 
 ### wait_bar(wait_bar|wait_time, player, text="", color=BarColor.WHITE, style=BarStyle.NOTCHED_10, update_interval=0.5, fall=True)
 
+> `!!pb timer \<time\> \[user\]`命令就是调用的这个方法。
+
 |参数|类型|描述|默认值|
 |----|----|----|----|
 |wait_time|int,float|等待时间（秒）|必须项|
@@ -135,13 +137,13 @@ PB_CONFIG = {
 > |`{wait_passed_time}`|已等待时间|
 > |`{wait_left_time}`|剩余时间|
 > 
-> `color`与`style`分别输入`BarColor`与`BarStyle`枚举类，请参考下文“枚举类 - BarColor/BarStyle”。
+> `color`与`style`分别输入[`BarColor`](#BarColor)与[`BarStyle`](#BarStyle)枚举类。
 > 
 > `fall`值为True则倒计时过程中条的值递减（0%->100%），False递增（100%->0%）。
 
 ## Bar类
 通过Bar类可以通过创建对象的方式创建bossbar，很方便的修改、获取bossbar的参数。
-关于Bar类的具体使用实例请阅读静态方法`wait_bar()`相关的源码。
+关于Bar类的具体使用实例请阅读静态方法[`wait_bar()`](./ProgressBar.py#L345)相关的源码。
 
 ### 成员变量
 **请通过Getter/Setter方法访问成员变量！**
